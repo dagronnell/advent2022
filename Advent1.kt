@@ -1,6 +1,6 @@
-fun main() {
-    val split = input.split("\n\n").maxOfOrNull { line ->
-        line.lines()
+fun advent1Part1() {
+    val split = input.split("\n\n").maxOfOrNull {
+        it.split("\n")
             .filter { it.isNotEmpty() }
             .sumOf { it.toInt() }
     }
@@ -8,8 +8,8 @@ fun main() {
 }
 
 fun advent1Part2() {
-    val split = input.split("\n\n").map { line ->
-        line.lines()
+    val split = input.split("\n\n").map {
+        it.split("\n")
             .filter { it.isNotEmpty() }
             .sumOf { it.toInt() }
     }.sorted()
