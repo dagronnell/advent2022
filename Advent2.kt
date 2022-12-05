@@ -1,3 +1,17 @@
+fun advent2Part1() {
+    val score = input2.lines().sumOf {
+        val otherWeapon = Weapon.from(it.substring(0, 1))
+        val weapon = Weapon.fromGuess(it.substring(2, 3))
+        weapon.points + when {
+            weapon == otherWeapon -> 3
+            weapon.beats() == otherWeapon -> 6
+            else -> 0
+        }
+    }
+
+    println(score)
+}
+
 fun advent2Part2() {
     val score = input2.lines().sumOf {
         val outcome = Outcome.from(it.substring(2, 3))
@@ -23,6 +37,12 @@ enum class Weapon(val char: String, private val beatenByStr: String, private val
 
     companion object {
         fun from(s: String): Weapon = values().find { it.char == s } ?: throw RuntimeException("Unknown weapon $s")
+        fun fromGuess(guess: String): Weapon = when (guess) {
+            "X" -> ROCK
+            "Y" -> PAPER
+            "Z" -> SCISSORS
+            else -> {throw RuntimeException("Unknown weapon $guess")}
+        }
     }
 }
 
