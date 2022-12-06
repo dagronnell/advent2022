@@ -1,4 +1,4 @@
-fun advent6Part1() {
+fun main() {
     println(advent6(input6, 4))
 }
 
@@ -7,7 +7,7 @@ fun advent6Part2() {
 }
 
 fun advent6(input: String, markerSize: Int) =
-    markerSize + input.toCharArray().toList().windowed(markerSize).indexOfFirst { chars ->
+    markerSize + input.windowed(markerSize).indexOfFirst { chars ->
         chars.toSet().size == markerSize
     }
 
