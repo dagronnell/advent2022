@@ -1,4 +1,4 @@
-fun main() {
+fun advent6Part1() {
     println(advent6(input6, 4))
 }
 
