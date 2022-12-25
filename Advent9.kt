@@ -1,55 +1,131 @@
-fun main() {
-    var headX = 200
-    var tailX = 200
-    var headY = 50
-    var tailY = 50
+fun advent9Part1() {
+    val tailVisited = solve(input9, 2)
+    println(tailVisited.size)
+}
+
+fun advent9Part2() {
+    val tailVisited = solve(input9, 10)
+    println(tailVisited.size)
+}
+
+private fun solve(input: String, knotCount: Int): MutableSet<String> {
+    val knots = MutableList(knotCount) {
+        Pair(0, 0)
+    }
     val tailVisited = mutableSetOf<String>()
-    input9.lines().filter { it.isNotEmpty() }
+    input.lines().filter { it.isNotEmpty() }
         .forEach { cmd ->
             val direction = cmd.substring(0, 1)
-            val steps = cmd.substring(2, 3).toInt()
+            val steps = cmd.substring(2).toInt()
             println("$direction $steps")
 
             repeat(steps) {
-                when (direction) {
-                    "U" -> {
-                        headY++
-                        if (headY > tailY + 1) {
-                            tailY++
-                            tailX = headX
-                        }
-                    }
-
-                    "D" -> {
-                        headY--
-                        if (headY < tailY - 1) {
-                            tailY--
-                            tailX = headX
-                        }
-                    }
-
-                    "R" -> {
-                        headX++
-                        if (headX > tailX + 1) {
-                            tailX++
-                            tailY = headY
-                        }
-                    }
-
-                    "L" -> {
-                        headX--
-                        if (headX < tailX - 1) {
-                            tailX--
-                            tailY = headY
-                        }
-                    }
+                moveHead(knots, direction)
+                repeat(knots.size - 1) {
+                    moveTail(knots, it)
                 }
-
-                tailVisited.add("$tailX:$tailY")
+                val tail = knots.last()
+                tailVisited.add("${tail.first}:${tail.second}")
             }
         }
+    return tailVisited
+}
 
-    println(tailVisited.size)
+private fun printMatrix(knots: MutableList<Pair<Int, Int>>) {
+    val width = knots.maxOfOrNull { it.first }
+    val height = knots.maxOfOrNull { it.second }
+
+    val matrix = initMatrix(width!! + 1, height!! + 1)
+    knots.forEachIndexed { index, knot ->
+        val v = if (index == 0) {
+            'H'
+        } else {
+            index.toString().first()
+        }
+        val old = matrix.valueAt(knot.first, knot.second)
+        if (old == '.') {
+            matrix.setValueAt(knot.first, knot.second, v)
+        }
+    }
+    matrix.print()
+
+    println()
+}
+
+fun moveHead(knots: MutableList<Pair<Int, Int>>, direction: String) {
+    val headX = knots.first().first
+    val headY = knots.first().second
+    when (direction) {
+        "U" -> knots[0] = Pair(headX, headY + 1)
+        "D" -> knots[0] = Pair(headX, headY - 1)
+        "R" -> knots[0] = Pair(headX + 1, headY)
+        "L" -> knots[0] = Pair(headX - 1, headY)
+    }
+}
+
+fun moveTail(knots: MutableList<Pair<Int, Int>>, headPos: Int) {
+    val tailPos = headPos + 1
+    val headX = knots[headPos].first
+    val headY = knots[headPos].second
+    val tailX = knots[tailPos].first
+    val tailY = knots[tailPos].second
+
+    var newTailX = tailX
+    var newTailY = tailY
+
+    if (headY > tailY + 1) {
+        newTailY = tailY + 1
+        if (headX < tailX) {
+            newTailX = tailX - 1
+        }
+        if (headX > tailX) {
+            newTailX = tailX + 1
+        }
+    }
+    if (headX < tailX - 1) {
+        newTailX = tailX - 1
+        if (headY < tailY) {
+            newTailY = tailY - 1
+        }
+        if (headY > tailY) {
+            newTailY = tailY + 1
+        }
+    }
+    if (headX > tailX + 1) {
+        newTailX = tailX + 1
+        if (headY < tailY) {
+            newTailY = tailY - 1
+        }
+        if (headY > tailY) {
+            newTailY = tailY + 1
+        }
+    }
+
+    if (headY < tailY - 1) {
+        newTailY = tailY - 1
+        if (headX < tailX) {
+            newTailX = tailX - 1
+        }
+        if (headX > tailX) {
+            newTailX = tailX + 1
+        }
+    }
+    knots[tailPos] = Pair(newTailX, newTailY)
+}
+
+private fun initMatrix(width: Int, height: Int): Matrix2 {
+    val lines = mutableListOf<String>()
+
+    repeat(height) {
+        lines.add(".".repeat(width))
+    }
+
+    val matrix = Matrix2(
+        lines.map { line ->
+            line.toList().toCharArray()
+        }.toTypedArray()
+    )
+    return matrix
 }
 
 data class Matrix2(val rows: Array<CharArray>) {
@@ -58,8 +134,6 @@ data class Matrix2(val rows: Array<CharArray>) {
         rows[y][x] = value
     }
 
-    fun getWidth() = rows.first().size
-    fun getHeight() = rows.size
     fun print() {
         for (r in rows.reversed()) {
             r.forEach {
@@ -70,7 +144,7 @@ data class Matrix2(val rows: Array<CharArray>) {
     }
 }
 
-const val input9Simple = """
+const val input9_1_simple = """
 R 4
 U 4
 L 3
@@ -79,6 +153,16 @@ R 4
 D 1
 L 5
 R 2
+"""
+const val input9_2_simple = """
+R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
 """
 
 const val input9 = """
