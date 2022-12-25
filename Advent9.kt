@@ -1,3 +1,5 @@
+import kotlin.math.abs
+
 fun advent9Part1() {
     val tailVisited = solve(input9, 2)
     println(tailVisited.size)
@@ -31,6 +33,56 @@ private fun solve(input: String, knotCount: Int): MutableSet<String> {
     return tailVisited
 }
 
+fun moveHead(knots: MutableList<Pair<Int, Int>>, direction: String) {
+    val headX = knots.first().first
+    val headY = knots.first().second
+    when (direction) {
+        "U" -> knots[0] = Pair(headX, headY + 1)
+        "D" -> knots[0] = Pair(headX, headY - 1)
+        "R" -> knots[0] = Pair(headX + 1, headY)
+        "L" -> knots[0] = Pair(headX - 1, headY)
+    }
+}
+
+fun moveTail(knots: MutableList<Pair<Int, Int>>, headPos: Int) {
+    val tailPos = headPos + 1
+    val headX = knots[headPos].first
+    val headY = knots[headPos].second
+    var tailX = knots[tailPos].first
+    var tailY = knots[tailPos].second
+    if (!touch(knots[headPos], knots[tailPos])) {
+        if (headX > tailX) {
+            tailX++
+        } else if (headX < tailX) {
+            tailX--
+        }
+        if (headY > tailY) {
+            tailY++
+        } else if (headY < tailY) {
+            tailY--
+        }
+        knots[tailPos] = Pair(tailX, tailY)
+    }
+}
+
+fun touch(knot1: Pair<Int, Int>, knot2: Pair<Int, Int>) =
+    !(abs(knot1.first - knot2.first) > 1 || abs(knot1.second - knot2.second) > 1)
+
+private fun initMatrix(width: Int, height: Int): Matrix2 {
+    val lines = mutableListOf<String>()
+
+    repeat(height) {
+        lines.add(".".repeat(width))
+    }
+
+    val matrix = Matrix2(
+        lines.map { line ->
+            line.toList().toCharArray()
+        }.toTypedArray()
+    )
+    return matrix
+}
+
 private fun printMatrix(knots: MutableList<Pair<Int, Int>>) {
     val width = knots.maxOfOrNull { it.first }
     val height = knots.maxOfOrNull { it.second }
@@ -50,82 +102,6 @@ private fun printMatrix(knots: MutableList<Pair<Int, Int>>) {
     matrix.print()
 
     println()
-}
-
-fun moveHead(knots: MutableList<Pair<Int, Int>>, direction: String) {
-    val headX = knots.first().first
-    val headY = knots.first().second
-    when (direction) {
-        "U" -> knots[0] = Pair(headX, headY + 1)
-        "D" -> knots[0] = Pair(headX, headY - 1)
-        "R" -> knots[0] = Pair(headX + 1, headY)
-        "L" -> knots[0] = Pair(headX - 1, headY)
-    }
-}
-
-fun moveTail(knots: MutableList<Pair<Int, Int>>, headPos: Int) {
-    val tailPos = headPos + 1
-    val headX = knots[headPos].first
-    val headY = knots[headPos].second
-    val tailX = knots[tailPos].first
-    val tailY = knots[tailPos].second
-
-    var newTailX = tailX
-    var newTailY = tailY
-
-    if (headY > tailY + 1) {
-        newTailY = tailY + 1
-        if (headX < tailX) {
-            newTailX = tailX - 1
-        }
-        if (headX > tailX) {
-            newTailX = tailX + 1
-        }
-    }
-    if (headX < tailX - 1) {
-        newTailX = tailX - 1
-        if (headY < tailY) {
-            newTailY = tailY - 1
-        }
-        if (headY > tailY) {
-            newTailY = tailY + 1
-        }
-    }
-    if (headX > tailX + 1) {
-        newTailX = tailX + 1
-        if (headY < tailY) {
-            newTailY = tailY - 1
-        }
-        if (headY > tailY) {
-            newTailY = tailY + 1
-        }
-    }
-
-    if (headY < tailY - 1) {
-        newTailY = tailY - 1
-        if (headX < tailX) {
-            newTailX = tailX - 1
-        }
-        if (headX > tailX) {
-            newTailX = tailX + 1
-        }
-    }
-    knots[tailPos] = Pair(newTailX, newTailY)
-}
-
-private fun initMatrix(width: Int, height: Int): Matrix2 {
-    val lines = mutableListOf<String>()
-
-    repeat(height) {
-        lines.add(".".repeat(width))
-    }
-
-    val matrix = Matrix2(
-        lines.map { line ->
-            line.toList().toCharArray()
-        }.toTypedArray()
-    )
-    return matrix
 }
 
 data class Matrix2(val rows: Array<CharArray>) {
