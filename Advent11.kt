@@ -1,4 +1,4 @@
-fun main() {
+fun advent11Part1() {
     val monkeys = input11.split("Monkey").drop(1).map {
         Monkey.createFrom(it)
     }
@@ -10,7 +10,7 @@ fun main() {
                 val operand = if (monkey.operation.operand == "old") {
                     item
                 } else {
-                    monkey.operation.operand.toInt()
+                    monkey.operation.operand.toLong()
                 }
 
                 val worryLevel = monkey.operation.op.invoke(operand, item).floorDiv(3)
@@ -22,23 +22,56 @@ fun main() {
         }
     }
 
-    val value = monkeys.map { it.inspections }.sorted().reversed().take(2)
-        .fold(1) { acc, i -> acc * i }
+    val value = monkeys.map { it.inspections }.sorted().reversed()
+        .take(2)
+        .reduce { acc, i -> acc * i }
+
+    println(value)
+}
+
+fun advent11Part2() {
+    val monkeys = input11.split("Monkey").drop(1).map {
+        Monkey.createFrom(it)
+    }
+    val modNumber = monkeys.map { it.testDivisibleNumber }.reduce { acc, i -> acc * i }
+
+    repeat(10000) {
+        monkeys.forEach { monkey ->
+            monkey.items.forEach { item ->
+                monkey.inspections++
+                val operand = if (monkey.operation.operand == "old") {
+                    item
+                } else {
+                    monkey.operation.operand.toLong()
+                }
+
+                val worryLevel = monkey.operation.op.invoke(operand, item) % modNumber
+                val receiver = monkey.getThrowToMonkey(worryLevel)
+                monkeys.find { it.number == receiver }?.items?.add(worryLevel)
+            }
+
+            monkey.items.clear()
+        }
+    }
+
+    val value = monkeys.map { it.inspections.toLong() }.sorted().reversed()
+        .take(2)
+        .reduce { acc, i -> acc * i }
 
     println(value)
 }
 
 data class Monkey(
     val number: Int,
-    val items: MutableList<Int>,
+    val items: MutableList<Long>,
     val operation: Operation,
     val testDivisibleNumber: Int,
     var receiverIfTrue: Int,
     var receiverIfFalse: Int,
     var inspections: Int = 0
 ) {
-    fun getThrowToMonkey(worryLevel: Int): Int =
-        if (worryLevel % testDivisibleNumber == 0) {
+    fun getThrowToMonkey(worryLevel: Long): Int =
+        if (worryLevel % testDivisibleNumber == 0L) {
             receiverIfTrue
         } else {
             receiverIfFalse
@@ -50,7 +83,7 @@ data class Monkey(
             var lineCnt = 0
             val number = lines[lineCnt++].substringBefore(":").trim().toInt()
             val items = lines[lineCnt++].substringAfter("Starting items:").split(",").toList()
-                .map { it.trim().toInt() }
+                .map { it.trim().toLong() }
                 .toMutableList()
             val op = Operation.from(lines[lineCnt++].substringAfter("Operation: new = old "))
             val divisibleBy = lines[lineCnt++].substringAfter("divisible by ").toInt()
@@ -67,13 +100,13 @@ data class Monkey(
     }
 }
 
-data class Operation(val operand: String, val op: (Int, Int) -> (Int)) {
+data class Operation(val operand: String, val op: (Long, Long) -> (Long)) {
     companion object {
         fun from(s: String): Operation {
             val parts = s.trim().split(" ")
             val op = when (parts[0]) {
-                "+" -> { i1: Int, i2: Int -> i1 + i2 }
-                "*" -> { i1: Int, i2: Int -> i1 * i2 }
+                "+" -> { i1: Long, i2: Long -> i1 + i2 }
+                "*" -> { i1: Long, i2: Long -> i1 * i2 }
                 else -> throw RuntimeException("Can't handle ${parts[0]}")
             }
             return Operation(op = op, operand = parts[1])

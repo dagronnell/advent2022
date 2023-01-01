@@ -1,6 +1,6 @@
 import kotlin.math.abs
 
-fun advent10_1() {
+fun advent10Part1() {
     val ops = input10.lines().filter { it.isNotEmpty() }
     var x = 1
     var cycles = 0
@@ -25,7 +25,7 @@ fun advent10_1() {
     println(sum)
 }
 
-fun advent10_2() {
+fun advent10Part2() {
     val ops = input10.lines().filter { it.isNotEmpty() }
     var x = 1
     var cycles = 0
